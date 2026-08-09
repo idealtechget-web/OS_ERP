@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IdealTech - Consulta de Ordem de Serviço</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 32px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+    .brand {
+      font-size: 26px;
+      font-weight: 700;
+      color: #38bdf8;
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 8px;
+      border: 1px solid #475569;
+      background-color: #0f172a;
+      color: #fff;
+      font-size: 16px;
+      text-align: center;
+      outline: none;
+      text-transform: uppercase;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus {
+      border-color: #38bdf8;
+    }
+    button {
+      padding: 14px;
+      border-radius: 8px;
+      border: none;
+      background-color: #0284c7;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #0369a1;
+    }
+    .error-msg {
+      color: #f87171;
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+    .hint {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="brand">IdealTech</div>
+    <div class="subtitle">Gestão e Tecnologia • Portal da OS</div>
+
+    <form class="form-group" onsubmit="buscarOS(event)">
+      <input type="text" id="osInput" placeholder="Ex: 260809KHDH" required autofocus>
+      <button type="submit">Acessar Ordem de Serviço</button>
+    </form>
+
+    <div id="errorMsg" class="error-msg">Ordem de Serviço não encontrada. Verifique o código e tente novamente.</div>
+
+    <div class="hint">Digite o código recebido no seu comprovante para visualizar o status do serviço.</div>
+  </div>
+
+  <script>
+    async function buscarOS(event) {
+      event.preventDefault();
+      const input = document.getElementById('osInput');
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.style.display = 'none';
+
+      // Limpa espaços, remove # se o cliente digitou e transforma em maiúsculas
+      let codigoBusca = input.value.trim().replace('#', '').toUpperCase();
+
+      if (!codigoBusca) return;
+
+      try {
+        // Consulta a API pública do GitHub para listar os arquivos do repositório
+        const response = await fetch('https://api.github.com/repos/idealtechget-web/OS/contents/');
+        
+        if (!response.ok) throw new Error('Erro ao buscar lista de arquivos');
+
+        const arquivos = await response.json();
+
+        // Procura um arquivo .html que contenha o código digitado
+        const arquivoEncontrado = arquivos.find(item => 
+          item.name.endsWith('.html') && 
+          item.name.toUpperCase().includes(codigoBusca)
+        );
+
+        if (arquivoEncontrado) {
+          // Redireciona diretamente para o arquivo encontrado
+          window.location.href = arquivoEncontrado.name;
+        } else {
+          errorMsg.style.display = 'block';
+        }
+      } catch (err) {
+        // Caso de fallback se a API do GitHub atingir limite: tenta o redirecionamento direto
+        window.location.href = 'OS_' + codigoBusca + '.html';
+      }
+    }
+  </script>
+
+</body>
+</html>
