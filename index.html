@@ -74,12 +74,6 @@
     button:hover {
       background-color: #0369a1;
     }
-    .error-msg {
-      color: #f87171;
-      font-size: 13px;
-      margin-top: 12px;
-      display: none;
-    }
     .hint {
       font-size: 12px;
       color: #64748b;
@@ -95,219 +89,25 @@
 
     <form class="form-group" onsubmit="buscarOS(event)">
       <input type="text" id="osInput" placeholder="Ex: 260809KHDH" required autofocus>
-      <button type="submit" id="btnBuscar">Acessar Ordem de Serviço</button>
+      <button type="submit">Acessar Ordem de Serviço</button>
     </form>
-
-    <div id="errorMsg" class="error-msg">Ordem de Serviço não encontrada. Verifique o número e tente novamente.</div>
 
     <div class="hint">Digite o código recebido no seu comprovante para visualizar o status do serviço.</div>
   </div>
 
   <script>
-    async function buscarOS(event) {
+    function buscarOS(event) {
       event.preventDefault();
       
       const input = document.getElementById('osInput');
-      const errorMsg = document.getElementById('errorMsg');
-      const btn = document.getElementById('btnBuscar');
       
-      errorMsg.style.display = 'none';
+      // Limpa espaços, remove o # se o cliente digitar e converte para maiúsculas
+      let codigo = input.value.trim().replace('#', '').toUpperCase();
 
-      // Pega o que o cliente digitou, limpa espaços, remove o # e coloca em maiúsculas
-      let termoDigitado = input.value.trim().replace('#', '').toUpperCase();
+      if (!codigo) return;
 
-      if (!termoDigitado) return;
-
-      btn.innerText = "Buscando...";
-      btn.disabled = true;
-
-      // Detecta automaticamente o nome do repositório da URL
-      const pathSegments = window.location.pathname.split('/').filter(Boolean);
-      const repoName = (pathSegments.length > 0 && !pathSegments[0].includes('.html')) ? pathSegments[0] : 'OS';
-
-      try {
-        // Consulta a API do GitHub para pegar a lista dos arquivos da pasta
-        const response = await fetch(`https://api.github.com/repos/idealtechget-web/${repoName}/contents/`);
-        
-        if (!response.ok) throw new Error('Não foi possível listar os arquivos');
-
-        const arquivos = await response.json();
-
-        // Encontra o arquivo .html que CONTÉM o código digitado
-        const arquivoEncontrado = arquivos.find(item => 
-          item.name.endsWith('.html') && 
-          item.name.toUpperCase().includes(termoDigitado)
-        );
-
-        if (arquivoEncontrado) {
-          // Redireciona para o nome EXATO do arquivo encontrado no GitHub
-          window.location.href = arquivoEncontrado.name;
-        } else {
-          errorMsg.style.display = 'block';
-          btn.innerText = "Acessar Ordem de Serviço";
-          btn.disabled = false;
-        }
-      } catch (err) {
-        // Fallback: se a API do GitHub falhar ou atingir limite, ele tenta abrir acrescentando OS_
-        window.location.href = `OS_${termoDigitado}.html`;
-      }
-    }
-  </script>
-
-</body>
-</html><!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IdealTech - Consulta de Ordem de Serviço</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #0f172a;
-      color: #f8fafc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-    .card {
-      background-color: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 32px;
-      width: 100%;
-      max-width: 440px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-      text-align: center;
-    }
-    .brand {
-      font-size: 26px;
-      font-weight: 700;
-      color: #38bdf8;
-      margin-bottom: 4px;
-    }
-    .subtitle {
-      font-size: 13px;
-      color: #94a3b8;
-      margin-bottom: 24px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 14px 16px;
-      border-radius: 8px;
-      border: 1px solid #475569;
-      background-color: #0f172a;
-      color: #fff;
-      font-size: 16px;
-      text-align: center;
-      outline: none;
-      text-transform: uppercase;
-      transition: border-color 0.2s;
-    }
-    input[type="text"]:focus {
-      border-color: #38bdf8;
-    }
-    button {
-      padding: 14px;
-      border-radius: 8px;
-      border: none;
-      background-color: #0284c7;
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    button:hover {
-      background-color: #0369a1;
-    }
-    .error-msg {
-      color: #f87171;
-      font-size: 13px;
-      margin-top: 12px;
-      display: none;
-    }
-    .hint {
-      font-size: 12px;
-      color: #64748b;
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="card">
-    <div class="brand">IdealTech</div>
-    <div class="subtitle">Gestão e Tecnologia • Portal da OS</div>
-
-    <form class="form-group" onsubmit="buscarOS(event)">
-      <input type="text" id="osInput" placeholder="Ex: 260809KHDH" required autofocus>
-      <button type="submit" id="btnBuscar">Acessar Ordem de Serviço</button>
-    </form>
-
-    <div id="errorMsg" class="error-msg">Ordem de Serviço não encontrada. Verifique o número e tente novamente.</div>
-
-    <div class="hint">Digite o código recebido no seu comprovante para visualizar o status do serviço.</div>
-  </div>
-
-  <script>
-    async function buscarOS(event) {
-      event.preventDefault();
-      
-      const input = document.getElementById('osInput');
-      const errorMsg = document.getElementById('errorMsg');
-      const btn = document.getElementById('btnBuscar');
-      
-      errorMsg.style.display = 'none';
-
-      // Pega o que o cliente digitou, limpa espaços, remove o # e coloca em maiúsculas
-      let termoDigitado = input.value.trim().replace('#', '').toUpperCase();
-
-      if (!termoDigitado) return;
-
-      btn.innerText = "Buscando...";
-      btn.disabled = true;
-
-      // Detecta automaticamente o nome do repositório da URL
-      const pathSegments = window.location.pathname.split('/').filter(Boolean);
-      const repoName = (pathSegments.length > 0 && !pathSegments[0].includes('.html')) ? pathSegments[0] : 'OS';
-
-      try {
-        // Consulta a API do GitHub para pegar a lista dos arquivos da pasta
-        const response = await fetch(`https://api.github.com/repos/idealtechget-web/${repoName}/contents/`);
-        
-        if (!response.ok) throw new Error('Não foi possível listar os arquivos');
-
-        const arquivos = await response.json();
-
-        // Encontra o arquivo .html que CONTÉM o código digitado
-        const arquivoEncontrado = arquivos.find(item => 
-          item.name.endsWith('.html') && 
-          item.name.toUpperCase().includes(termoDigitado)
-        );
-
-        if (arquivoEncontrado) {
-          // Redireciona para o nome EXATO do arquivo encontrado no GitHub
-          window.location.href = arquivoEncontrado.name;
-        } else {
-          errorMsg.style.display = 'block';
-          btn.innerText = "Acessar Ordem de Serviço";
-          btn.disabled = false;
-        }
-      } catch (err) {
-        // Fallback: se a API do GitHub falhar ou atingir limite, ele tenta abrir acrescentando OS_
-        window.location.href = `OS_${termoDigitado}.html`;
-      }
+      // Direciona direto para o arquivo correspondente (ex: 260809KHDH.html)
+      window.location.href = codigo + '.html';
     }
   </script>
 
