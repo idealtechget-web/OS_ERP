@@ -1,0 +1,24 @@
+<script>
+  let últimaModificação = null;
+
+  async function checarAtualizacao() {
+    try {
+      // Faz uma requisição leve apenas para checar o cabeçalho do arquivo
+      const resposta = await fetch(window.location.href, { method: 'HEAD', cache: 'no-cache' });
+      const dataModificacao = resposta.headers.get('last-modified');
+
+      if (últimaModificação && dataModificacao !== últimaModificação) {
+        // O arquivo foi alterado no GitHub! Recarrega para mostrar a nova versão
+        window.location.reload();
+      } else {
+        últimaModificação = dataModificacao;
+      }
+    } catch (err) {
+      console.log('Erro ao verificar atualização da OS');
+    }
+  }
+
+  // Checa se houve alteração a cada 1 minuto (60.000 ms)
+  setInterval(checarAtualizacao, 60000);
+  checarAtualizacao();
+</script>
