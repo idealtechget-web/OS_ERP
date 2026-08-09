@@ -88,7 +88,7 @@
     <div class="subtitle">Gestão e Tecnologia • Portal da OS</div>
 
     <form class="form-group" onsubmit="buscarOS(event)">
-      <input type="text" id="osInput" placeholder="Ex: 260809KHDH" required autofocus>
+      <input type="text" id="osInput" placeholder="EX: 260809KHDH" required autofocus>
       <button type="submit">Acessar Ordem de Serviço</button>
     </form>
 
@@ -101,12 +101,12 @@
       
       const input = document.getElementById('osInput');
       
-      // Limpa espaços, remove o # se o cliente digitar e converte para maiúsculas
+      // Limpa espaços, remove o # (se o cliente colocar) e deixa maiúsculo
       let codigo = input.value.trim().replace('#', '').toUpperCase();
 
       if (!codigo) return;
 
-      // Direciona direto para o arquivo correspondente (ex: 260809KHDH.html)
+      // Direciona direto para o arquivo .html com o código digitado
       window.location.href = codigo + '.html';
     }
   </script>
