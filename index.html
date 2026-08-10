@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>IDEALTECH - Consulta de Ordem de Serviço</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #0f172a;
@@ -62,6 +66,8 @@
       outline: none;
       text-transform: uppercase;
       transition: border-color 0.2s;
+      letter-spacing: 1px;
+      font-family: 'Consolas', 'Courier New', monospace;
     }
     input[type="text"]:focus {
       border-color: #3b82f6;
@@ -80,6 +86,10 @@
     button:hover {
       background-color: #0369a1;
     }
+    button:disabled {
+      background-color: #334155;
+      cursor: not-allowed;
+    }
     .btn-back {
       display: inline-block;
       width: 100%;
@@ -92,7 +102,6 @@
       font-size: 14px;
       font-weight: 600;
       text-decoration: none;
-      cursor: pointer;
       transition: all 0.2s;
     }
     .btn-back:hover {
@@ -125,7 +134,7 @@
     <div class="subtitle">Gestão e Tecnologia • Portal da OS</div>
 
     <form class="form-group" onsubmit="buscarOS(event)">
-      <input type="text" id="osInput" placeholder="Ex: 260809KHDH" required autofocus autocomplete="off">
+      <input type="text" id="osInput" placeholder="Ex: 260809KHDH" required autofocus autocomplete="off" />
       <button type="submit" id="btnSubmit">Acessar Ordem de Serviço</button>
     </form>
 
@@ -133,7 +142,7 @@
 
     <div class="hint">Digite o código recebido no seu comprovante para visualizar o status do serviço.</div>
 
-    <button type="button" class="btn-back" onclick="window.history.back()">← Voltar</button>
+    <a href="https://idealtech.srv.br" class="btn-back">← Voltar para o Início</a>
   </div>
 
   <script>
@@ -142,11 +151,11 @@
       const input = document.getElementById('osInput');
       const errorMsg = document.getElementById('errorMsg');
       const btnSubmit = document.getElementById('btnSubmit');
-      
+
       errorMsg.style.display = 'none';
 
-      // Limpa espaços, remove # se o cliente digitou e transforma em maiúsculas
-      let codigoBusca = input.value.trim().replace('#', '').toUpperCase();
+      // Remove '#' e espaços, mantém maiúsculas/minúsculas originais
+      let codigoBusca = input.value.trim().replace(/#/g, '').toUpperCase();
 
       if (!codigoBusca) return;
 
@@ -154,30 +163,43 @@
       btnSubmit.disabled = true;
 
       try {
-        // Consulta a API pública do GitHub
-        const response = await fetch('https://api.github.com/repos/idealtechget-web/OS/contents/');
-        
-        if (!response.ok) throw new Error('Erro na API');
+        // Tenta localizar o arquivo via API do GitHub
+        const response = await fetch('https://api.github.com/repos/idealtechget-web/OS_ERP/contents/');
+        if (!response.ok) throw new Error('API GitHub indisponível');
 
         const arquivos = await response.json();
-
-        // Procura um arquivo .html que contenha o código digitado
-        const arquivoEncontrado = arquivos.find(item => 
-          item.name.endsWith('.html') && 
+        const arquivoEncontrado = arquivos.find(item =>
+          item.name.toLowerCase().endsWith('.html') &&
           item.name.toUpperCase().includes(codigoBusca)
         );
 
         if (arquivoEncontrado) {
+          // Redireciona para o nome exato do arquivo
           window.location.href = arquivoEncontrado.name;
-        } else {
-          errorMsg.style.display = 'block';
-          btnSubmit.innerText = 'Acessar Ordem de Serviço';
-          btnSubmit.disabled = false;
+          return;
         }
       } catch (err) {
-        // Fallback se atingir limite da API do GitHub: tenta redirecionamento direto
-        window.location.href = 'OS_' + codigoBusca + '.html';
+        console.warn('Fallback ativado (API falhou):', err);
       }
+
+      // FALLBACK: tenta redirecionar diretamente para codigoBusca + '.html'
+      // NÃO usar toLowerCase() – mantém a capitalização original
+      const destino = codigoBusca + '.html';
+      // Verifica se o arquivo existe (opcional) – tentar fetch
+      try {
+        const testResponse = await fetch(destino, { method: 'HEAD' });
+        if (testResponse.ok) {
+          window.location.href = destino;
+          return;
+        }
+      } catch (_) {
+        // Se falhar, mostra erro
+      }
+
+      // Se chegou aqui, não encontrou
+      errorMsg.style.display = 'block';
+      btnSubmit.innerText = 'Acessar Ordem de Serviço';
+      btnSubmit.disabled = false;
     }
   </script>
 
