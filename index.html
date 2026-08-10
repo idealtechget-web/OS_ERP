@@ -146,6 +146,24 @@
   </div>
 
   <script>
+    function resetarFormulario() {
+      const btnSubmit = document.getElementById('btnSubmit');
+      const errorMsg = document.getElementById('errorMsg');
+      
+      if (btnSubmit) {
+        btnSubmit.innerText = 'Acessar Ordem de Serviço';
+        btnSubmit.disabled = false;
+      }
+      if (errorMsg) {
+        errorMsg.style.display = 'none';
+      }
+    }
+
+    // Restaura o formulário e o botão quando o usuário volta à página
+    window.addEventListener('pageshow', function (event) {
+      resetarFormulario();
+    });
+
     async function buscarOS(event) {
       event.preventDefault();
       const input = document.getElementById('osInput');
@@ -183,9 +201,7 @@
       }
 
       // FALLBACK: tenta redirecionar diretamente para codigoBusca + '.html'
-      // NÃO usar toLowerCase() – mantém a capitalização original
       const destino = codigoBusca + '.html';
-      // Verifica se o arquivo existe (opcional) – tentar fetch
       try {
         const testResponse = await fetch(destino, { method: 'HEAD' });
         if (testResponse.ok) {
@@ -193,13 +209,12 @@
           return;
         }
       } catch (_) {
-        // Se falhar, mostra erro
+        // Se falhar, continua para mostrar a mensagem de erro
       }
 
       // Se chegou aqui, não encontrou
       errorMsg.style.display = 'block';
-      btnSubmit.innerText = 'Acessar Ordem de Serviço';
-      btnSubmit.disabled = false;
+      resetarFormulario();
     }
   </script>
 
